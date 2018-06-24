@@ -1,0 +1,63 @@
+## VDOM、VNODE跟HTML(DOM)
+
+所谓的VDOM，就是用JS对象的形式来表示的DOM节点，因为没插入到页面中，只存在于内存中，所以是VDOM。
+
+DOM树是由一个个元素节点（node）组成，VDOM同理，也是由一个个VNODE组成，VNOOD跟VDOM同理，是仅存在内存中的JS对象形式表现的NODE。
+
+
+## 步骤
+
+一、构建VDOM
+构建VDOM的思路很简单，就是把node转成vnode，然后再把vnode集成vdom插入到页面中，如同：
+HTML => VNODE => VDOM => HTML。
+这是第一步，也是很关键的一步，在真实的DOM跟VDOM之间架起桥梁，后续才可以通过操作VDOM，来产生或改变呈现到页面的HTML。
+
+具体的做法是，NODE节点都包括：
+    type        :   元素类型
+    props       :   元素属性
+    children    :   子元素集合
+    
+    任何节点，最终都可以解析成以下的格式：
+    {type:"div",props:{"style":""},children:[
+        {type:"img",props:{"src":"..."}}
+    ]}
+
+    HTML => Vnodes 基于打包工具实现自动处理
+        Gulp : 文件流管道操作
+        webpack : 模块化松耦合处理
+        rollup.js : ES6模块调用分析处理
+
+        ES6 : babel-core | babel-preset-env
+        JSX - transform html : babel-plugin-transform-react-jsx
+        rollup : rollup | rollup-plugin-babel
+
+
+二、DIFF Virtual DOM & Update
+DIFF算法是React框架采用的方法。也就是如何判断DOM发生了变化、如何找到这个变化，然后实现差量更新。
+
+DOM的变化主要有三种：appendChild、replaceChild、removeChild.
+
+更新的过程，其实也是diff children的过程。第一步已经把DOM转成了VNODE，每个VNOOD都会有一个children，用于存储子节点，通过递归children的方式，就可以判断不同的children并对其操作。有以下几种情况：
+1、没有旧的节点，则创建新的节点，并插入父节点。
+2、如果没有新的节点，则摧毁旧的节点。
+3、如果节点发生了变化，则用replaceChild改变节点信息
+4、如果节点没有变化，则对比该节点的子节点进行判断，使用递归调用
+ 
+
+三、Handle Props & Event
+
+DIFF props：同DIFF VDOM，找到props的不同，然后setAttribute跟removeAttribute
+
+
+四、封装组件与应用
+
+                    代码:HTML模板 + 业务逻辑      VM (view model )
+页面 V(View) => 
+                    数据:一般是由后台返回给前端的   M(Model)
+
+如何构建MV-VM开发模式？
+1. 模块化-松耦合：把不同业务按照模块划分开，实现松耦合 ES6 Module
+2. 渲染模板-业务处理：Virtual DOM
+3. 打包处理-代码检查、压缩等：webpack、rollup、gulp
+
+VM => ES6 Module + Virtual DOM + rollup打包工具
